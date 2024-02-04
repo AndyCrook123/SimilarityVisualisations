@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>D3 Visualisations</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <link rel="stylesheet" href="index.css">
+</head>
+<body>
+    <h1>Plagiarism Detection Visualisation</h1>
+    <svg id="chart"></svg>
+    
+    <script>
+        // Set the visualization size
+        let width = 960, height = 800;
+
+        // Setup the svg element using viewBox
+        const svg = d3.select("#chart")
+            .attr("width", width)
+            .attr("height", height)
+            .attr("viewBox", [-width / 2, -height / 2, width, height]);
+
+        // Setup the color function
+        const scale = d3.scaleOrdinal(d3.schemeCategory10);
+        const color = d => scale(d.id[0]);
+
+        // Parse the graph object
+        let filename = 'similarity_graph.json';
+        fetch(filename)
+            .then(response => response.json())
+            .then(data => {
+                console.log(data);
+
+                // Prune links that don't meet a threshold
+                let minSimilarity = 0.5;
+                let filteredLinks = data.links.filter(link => link.value > minSimilarity);
+
+                // Use the filtered links and original nodes for simulation
+                const links = filteredLinks;
+                const nodes = data.nodes;
+
+                // Setup simulation (how nodes move around)
+                const simulation = d3.forceSimulation(nodes)
+                    .force("link", d3.forceLink(links).id(d => d.id).distance(200))
+                    .force("charge", d3.forceManyBody().strength(-100))
+                    .force("center", d3.forceCenter(-150, -250));
+
+                // Setup the drag function that controls the drag behavior
+                const drag = d3.drag()
+                    .on("start", dragstarted)
+                    .on("drag", dragged)
+                    .on("end", dragended);
+
+                // Create a container and line for each link
+                const link = svg.append("g")
+                    .attr("class", "links")
+                    .selectAll("line")
+                    .data(links)
+                    .join("line")
+                        .attr("stroke-width", d => Math.sqrt(d.value) * 10)
+                        .attr("stroke", "#999")
+                        .attr("stroke-opacity", 0.6);
+
+                // Create a container for each node
+                const node = svg.append("g")
+                    .attr("class", "nodes")
+                    .selectAll(".node")
+                    .data(nodes)
+                    .enter().append("g")
+                        .attr("class", "node")
+                        .call(drag);
+                
+                node.append("circle")
+                    .attr("r", 10)
+                    .attr("fill", color);
+                
+                node.append("text")
+                    .text(d => d.id)
+                    .attr("x", 12)
+                    .attr("y", 5)
+                    .style("font-size", "20px")
+                    .style("fill", "#333");
+                // Update the network visualization based on the simulation
+                simulation.on("tick", () => {
+                    link
+                        .attr("x1", d => d.source.x)
+                        .attr("y1", d => d.source.y)
+                        .attr("x2", d => d.target.x)
+                        .attr("y2", d => d.target.y);
+                    
+                    node
+                        .attr("transform", d => `translate(${d.x}, ${d.y})`)
+                        .attr("cx", d => d.x)
+                        .attr("cy", d => d.y);
+                });
+
+                function dragstarted(event, d) {
+                    if (!event.active) simulation.alphaTarget(0.3).restart();
+                    d.fx = d.x;
+                    d.fy = d.y;
+                }
+
+                function dragged(event, d) {
+                    d.fx = event.x;
+                    d.fy = event.y;
+                }
+
+                function dragended(event, d) {
+                    if (!event.active) simulation.alphaTarget(0);
+                    d.fx = null;
+                    d.fy = null;
+                }
+            })
+            .catch(error => console.error('Error fetching data:', error));
+    </script>
+</body>
+</html>
