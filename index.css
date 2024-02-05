@@ -6,6 +6,10 @@
     max-width: 500px;
   }
   
+  #chart2 {
+    max-width: 500px;
+  }
+  
   .node circle {
     stroke: white;
     stroke-width: 1.5;

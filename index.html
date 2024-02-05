@@ -115,6 +115,44 @@
                 }
             })
             .catch(error => console.error('Error fetching data:', error));
+
+            // Assuming the matrix data is stored in 'similarity_matrix.json' in the same directory
+            
+// Size of the matrix visualization
+const width2 = 300;
+const height2 = 300;
+const margin = { top: 20, right: 20, bottom: 20, left: 20 };
+
+// Load the similarity matrix data
+let filename2 = 'similarity_matrix.json';
+d3.json(filename2).then(function(matrix) {
+    const svg2 = d3.select("#chart2")
+        .attr("width", width2 + margin.left + margin.right)
+        .attr("height", height2 + margin.top + margin.bottom)
+        .append("g")
+        .attr("transform", `translate(${margin.left},${margin.top})`);
+
+    const numItems = matrix.length; // Assuming the matrix is square
+    const cellSize = Math.min(width2, height2) / numItems;
+
+    // Color scale: choose a range suitable for your data
+    const colorScale = d3.scaleSequential(d3.interpolateBlues)
+        .domain([0, 1]); // Assuming similarity scores range from 0 to 1
+
+    // Draw each cell
+    matrix.forEach((row, i) => {
+        row.forEach((value, j) => {
+            svg2.append("rect")
+                .attr("x", j * cellSize)
+                .attr("y", i * cellSize)
+                .attr("width", cellSize)
+                .attr("height", cellSize)
+                .style("fill", colorScale(value))
+                .style("stroke", "grey"); // Adding a stroke to distinguish cells
+        });
+    });
+})
+    .catch(error => console.error('Error fetching matrix data:', error));
     </script>
 </body>
 </html>
