@@ -2,7 +2,7 @@
     text-align: center;
   }
   
-  #chart {
+  #chart1 {
     max-width: 500px;
   }
   
@@ -20,4 +20,13 @@
   .link {
     stroke: black;
     stroke-opacity: 0.6;
+  }
+  
+  .container {
+    display: inline-block; /* or you can use 'block' for vertical stacking */
+    margin: 10px;
+  }
+  
+  svg {
+    border: 1px solid #ccc; /* Visual border for SVG */
   }

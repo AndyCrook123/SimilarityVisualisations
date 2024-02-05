@@ -7,14 +7,18 @@
 </head>
 <body>
     <h1>Plagiarism Detection Visualisation</h1>
-    <svg id="chart"></svg>
-    
+    <div class="container">
+        <svg id="chart1"></svg>
+    </div>
+    <div class="container">
+        <svg id="chart2"></svg>
+    </div>
     <script>
         // Set the visualization size
         let width = 960, height = 800;
 
         // Setup the svg element using viewBox
-        const svg = d3.select("#chart")
+        const svg = d3.select("#chart1")
             .attr("width", width)
             .attr("height", height)
             .attr("viewBox", [-width / 2, -height / 2, width, height]);
