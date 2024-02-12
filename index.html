@@ -116,42 +116,65 @@
             })
             .catch(error => console.error('Error fetching data:', error));
 
-            // Assuming the matrix data is stored in 'similarity_matrix.json' in the same directory
-            
-// Size of the matrix visualization
-const width2 = 300;
-const height2 = 300;
+            let filename2 = 'similarity_matrix.json';
+            d3.json(filename2).then(function(data) {
+                const matrix = data.matrix;
+                const names = data.names;
+                drawMatrix(matrix, names);
+            }).catch(error => console.error('Error fetching matrix data:', error));    
 
+            function drawMatrix(matrix, names) {
+            // Adjust these values to scale down the size of the matrix visualization
+            const margin = { top: 175, right: 20, bottom: 50, left: 80};
+            const width2 = 400; // New width for the matrix visualization
+            const height2 = 400; // New height for the matrix visualization
+            const cellSize = width2 / names.length; // Calculate cell size based on the new dimensions
 
-// Load the similarity matrix data
-let filename2 = 'similarity_matrix.json';
-d3.json(filename2).then(function(matrix) {
-    const svg2 = d3.select("#chart2")
-        .attr("width", width2)
-        .attr("height", height2)
-        .append("g")
+            const svg2 = d3.select("#chart2")
+                .attr("width", width2 + margin.left + margin.right)
+                .attr("height", height2 + margin.top + margin.bottom)
+                .append("g")
+                .attr("transform", `translate(${margin.left},${margin.top})`);
 
-    const numItems = matrix.length; // Assuming the matrix is square
-    const cellSize = Math.min(width2, height2) / numItems;
+            const colorScale = d3.scaleSequential(d3.interpolateBlues).domain([0, 1]);
 
-    // Color scale: choose a range suitable for your data
-    const colorScale = d3.scaleSequential(d3.interpolateBlues)
-        .domain([0, 1]); // Assuming similarity scores range from 0 to 1
+            matrix.forEach((row, rowIndex) => {
+                row.forEach((value, colIndex) => {
+                    svg2.append("rect")
+                        .attr("x", colIndex * cellSize)
+                        .attr("y", rowIndex * cellSize)
+                        .attr("width", cellSize)
+                        .attr("height", cellSize)
+                        .style("fill", colorScale(value))
+                        .style("stroke", "grey");
+                });
+            });
 
-    // Draw each cell
-    matrix.forEach((row, i) => {
-        row.forEach((value, j) => {
-            svg2.append("rect")
-                .attr("x", j * cellSize)
-                .attr("y", i * cellSize)
-                .attr("width", cellSize)
-                .attr("height", cellSize)
-                .style("fill", colorScale(value))
-                .style("stroke", "grey"); // Adding a stroke to distinguish cells
-        });
-    });
-})
-    .catch(error => console.error('Error fetching matrix data:', error));
+            // Add row labels
+            svg2.selectAll(".rowLabel")
+                .data(names)
+                .enter()
+                .append("text")
+                .text(d => d)
+                .attr("x", -5)
+                .attr("y", (d, i) => i * cellSize + cellSize / 2)
+                .style("text-anchor", "end")
+                .style("alignment-baseline", "middle")
+                .style("font-size", "15px");
+
+            // Add column labels
+            svg2.selectAll(".columnLabel")
+                .data(names)
+                .enter()
+                .append("text")
+                .text(d => d)
+                .attr("x", (d, i) => i * cellSize + cellSize / 2)
+                .attr("y", -5)
+                .style("text-anchor", "start")
+                .style("alignment-baseline", "ideographic")
+                .style("font-size", "15px")
+                .attr("transform", (d, i) => `rotate(-45,${i * cellSize + cellSize / 2},-5)`);
+        }    
     </script>
 </body>
 </html>
