@@ -3,13 +3,17 @@
   }
   
   #chart1 {
-    max-width: 500px;
+    margin-left: 150px;
+    width: 580.5px;
+    height: 800px;
   }
   
   #chart2 {
-    max-width: 500px;
+    margin-left: 500px;
+    width: 580.5px;
+    height: 800px;
   }
-  
+
   .node circle {
     stroke: white;
     stroke-width: 1.5;
@@ -28,9 +32,11 @@
   
   .container {
     display: inline-block; /* or you can use 'block' for vertical stacking */
-    margin: 10px;
+    width: 582.5px;
   }
   
   svg {
     border: 1px solid #ccc; /* Visual border for SVG */
   }
+
+  
