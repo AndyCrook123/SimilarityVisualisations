@@ -35,8 +35,76 @@
     width: 582.5px;
   }
   
-  svg {
-    
+  .legend-container {
+    display: flex;
+    justify-content: center;
+    z-index: 2;
+    position: relative;
+    bottom: 150px;
+    left: 488px;
   }
+  
+  .legend-scale {
+    width: 400px;
+    height: 20px;
+    position: relative;
+  }
+  
+  .legend-gradient {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(to right, 
+    #f7fbff, /* interpolateBlues(0) */
+    #9ecae1, /* interpolateBlues(0.25) */
+    #4292c6, /* interpolateBlues(0.5) */
+    #2171b5, /* interpolateBlues(0.75) */
+    #08306b  /* interpolateBlues(1) */);
+    border: 1px solid #ccc;
+  }
+  
+  .legend-labels {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 5px;
+    position: relative;
+    right: 45px;
+    width: 450px;
+    height:25px;
+  }
+  
+  .legend-labels span {
+    font-size: 15px;
+    margin-left: 20px;
+    margin-right: 20px;
+  }
+  
+  .thickness-scale {
+    display: flex;
+    align-items: center;
+    z-index: 2;
+    position: relative;
+    bottom: 165px;
+    left: 150px;
+  }
+  
+  .thickness-example {
+    width: 50px;
+    margin-right: 10px;
+    margin-left: 10px;
+    background-color: #999;
+  }
+  
+  .thin {
+    height: 2px;
+  }
+  
+  .medium {
+    height: 5px;
+  }
+  
+  .thick {
+    height: 10px;
+  }
+  
 
   

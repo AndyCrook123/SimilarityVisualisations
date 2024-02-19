@@ -9,14 +9,30 @@
     <h1>Plagiarism Detection Visualisation</h1>
     <div class="container">
         <svg id="chart1"></svg>
+        <div class="thickness-scale">
+            <div class="thickness-example thin"></div> Less Similar 
+            <div class="thickness-example medium"></div> Medium Similarity 
+            <div class="thickness-example thick"></div> More Similar 
+        </div>  
     </div>
     <div class="container">
         <svg id="chart2"></svg>
+        <div class="legend-container">
+            <div class="legend-scale">
+              <div class="legend-gradient"></div>
+              <div class="legend-labels">
+                <span class="span1"> 0% Similarity </span>
+                <span> 25% Similarity </span>
+                <span> 50% Similarity </span>
+                <span> 75% Similarity </span>
+                <span class="span4"> 100% Similarity </span>
+              </div>
+            </div>
+          </div>    
     </div>
-    <p class id="p1"></p>
     <script>
         // Set the visualization size
-        let width = 900, height = 900;
+        let width = 800, height = 800;
 
         // Setup the svg element using viewBox
         const svg = d3.select("#chart1")
@@ -36,7 +52,7 @@
                 console.log(data);
 
                 // Prune links that don't meet a threshold
-                let minSimilarity = 0.10;
+                let minSimilarity = 0.50;
                 let filteredLinks = data.links.filter(link => link.value > minSimilarity);
 
                 // Use the filtered links and original nodes for simulation
@@ -45,15 +61,37 @@
 
                 // Setup simulation (how nodes move around)
                 const simulation = d3.forceSimulation(nodes)
-                    .force("link", d3.forceLink(links).id(d => d.id).distance(300))
-                    .force("charge", d3.forceManyBody().strength(-15))
-                    .force("center", d3.forceCenter(-150, -150));
+                    .force("link", d3.forceLink(links).id(d => d.id).distance(200))
+                    .force("charge", d3.forceManyBody().strength(-50))
+                    .force("center", d3.forceCenter(-150,-150))
 
+                    // Function to reduce repulsion when dragging starts
+                function reduceRepulsion() {
+                    simulation.force("charge").strength(-10); // Reduced repulsion when dragging
+                    simulation.alphaTarget(0.3).restart(); // Briefly reheat the simulation
+                }
+                
+                // Function to reset repulsion after dragging ends
+                function resetRepulsion() {
+                    simulation.force("charge").strength(-0); // Reset to strong repulsion
+                    simulation.alphaTarget(0); // Cool down the simulation
+                }
                 // Setup the drag function that controls the drag behavior
                 const drag = d3.drag()
-                    .on("start", dragstarted)
-                    .on("drag", dragged)
-                    .on("end", dragended);
+                    .on("start", function(event, d) {
+                        if (!event.active) reduceRepulsion();
+                        d.fx = d.x; // Fix the position of the node being dragged
+                        d.fy = d.y;
+                    })
+                    .on("drag", function(event, d) {
+                        d.fx = event.x;
+                        d.fy = event.y;
+                    })
+                    .on("end", function(event, d) {
+                        if (!event.active) resetRepulsion();
+                        d.fx = null; // Release the fixed position
+                        d.fy = null;
+                    });
 
                 // Create a container and line for each link
                 const link = svg.append("g")
@@ -178,7 +216,7 @@
                 .style("alignment-baseline", "ideographic")
                 .style("font-size", "15px")
                 .attr("transform", (d, i) => `rotate(-45,${i * cellSize + cellSize / 2},-5)`);
-        }    
+    }
     </script>
 </body>
 </html>
