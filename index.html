@@ -6,7 +6,7 @@
     <link rel="stylesheet" href="index.css">
 </head>
 <body>
-    <h1>Plagiarism Detection Visualisation</h1>
+    <h1>Plagiarism Detection Visualisations</h1>
     <div class="container">
         <svg id="chart1"></svg>
         <div class="thickness-scale">
@@ -52,7 +52,7 @@
                 console.log(data);
 
                 // Prune links that don't meet a threshold
-                let minSimilarity = 0.50;
+                let minSimilarity = 0.5;
                 let filteredLinks = data.links.filter(link => link.value > minSimilarity);
 
                 // Use the filtered links and original nodes for simulation
