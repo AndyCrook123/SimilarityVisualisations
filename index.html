@@ -7,6 +7,7 @@
 </head>
 <body>
     <h1>Plagiarism Detection Visualisations</h1>
+    <p class = "p1">Lines are created when there is a 50% or greater similarity between them.</p>
     <div class="container">
         <svg id="chart1"></svg>
         <div class="thickness-scale">
@@ -59,6 +60,10 @@
                 const links = filteredLinks;
                 const nodes = data.nodes;
 
+                const strokeWidthScale = d3.scaleLinear()
+                .domain([d3.min(links, d => d.value), d3.max(links, d => d.value)])
+                .range([0.25, 1]); // Adjust range based on desired thickness
+
                 // Setup simulation (how nodes move around)
                 const simulation = d3.forceSimulation(nodes)
                     .force("link", d3.forceLink(links).id(d => d.id).distance(200))
@@ -67,7 +72,7 @@
 
                     // Function to reduce repulsion when dragging starts
                 function reduceRepulsion() {
-                    simulation.force("charge").strength(-10); // Reduced repulsion when dragging
+                    simulation.force("charge").strength(-2); // Reduced repulsion when dragging
                     simulation.alphaTarget(0.3).restart(); // Briefly reheat the simulation
                 }
                 
@@ -93,16 +98,35 @@
                         d.fy = null;
                     });
 
+                    
                 // Create a container and line for each link
                 const link = svg.append("g")
-                    .attr("class", "links")
-                    .selectAll("line")
-                    .data(links)
-                    .join("line")
-                        .attr("stroke-width", d => d.value * 10)
-                        .attr("stroke", "#999")
-                        .attr("stroke-opacity", 0.6);
+                .attr("class", "links")
+                .selectAll("line")
+                .data(links)
+                .join("line")
+                .attr("id", d => {
+                    const ids = [d.source.id, d.target.id].sort();
+                    return `link-${ids[0]}-${ids[1]}`;
+                })
 
+                .attr("stroke-width", d => strokeWidthScale(d.value)* 8) 
+                .attr("stroke", "#999")
+                .attr("stroke-opacity", 1)
+                .on("mouseover", function(event, d) {
+                    const ids = [d.source.id, d.target.id].sort();
+                    const matrixId = `matrix-${ids[0]}-${ids[1]}`;
+                    console.log("Graph link over:", matrixId);
+                    const selection = d3.select(`#${matrixId}`);
+                    console.log(selection);
+                    selection.classed("highlighted", true);
+                    showTooltip(event, d);
+                })
+                .on("mouseout", function(event, d) {
+                    d3.selectAll(".matrix-cell").classed("highlighted",false);
+                    hideTooltip();  
+                });
+            
                 // Create a container for each node
                 const node = svg.append("g")
                     .attr("class", "nodes")
@@ -152,6 +176,7 @@
                     d.fx = null;
                     d.fy = null;
                 }
+        
             })
             .catch(error => console.error('Error fetching data:', error));
 
@@ -178,20 +203,34 @@
                 const colorScale = d3.scaleSequential(d3.interpolateBlues)
                 .domain([0, 1]); // Assuming similarity scores are normalized between 0 and 1
 
-            matrix.forEach((row, rowIndex) => {
-            row.forEach((value, colIndex) => {
-            svg2.append("rect")
-            .attr("x", colIndex * cellSize)
-            .attr("y", rowIndex * cellSize)
-            .attr("width", cellSize)
-            .attr("height", cellSize)
-            .style("fill", colorScale(value)) // Use the color scale here
-            .style("stroke", "grey");
-
-            });
-        });
-
-
+                matrix.forEach((row, rowIndex) => {
+                    row.forEach((value, colIndex) => {
+                        svg2.append("rect")
+                            .attr("x", colIndex * cellSize)
+                            .attr("y", rowIndex * cellSize)
+                            .attr("width", cellSize)
+                            .attr("height", cellSize)
+                            .style("fill", colorScale(value))
+                            .attr("class", `matrix-cell`) 
+                            .attr("id", (d, i, j) => { 
+                                const ids = [names[rowIndex], names[colIndex]].sort(); 
+                                return `matrix-${ids[0]}-${ids[1]}`;
+                            })
+                            .on("mouseover", (event) => {
+                                const ids = [names[rowIndex], names[colIndex]].sort();
+                                const linkId = `link-${ids[0]}-${ids[1]}`;
+                                console.log("Matrix cell over:", linkId);
+                                d3.select(`#${linkId}`).classed("highlighted", true);                            
+                            showTooltip(event, {value: value}); 
+                        })
+                        .on("mouseout", (event) => {
+                            d3.selectAll(".links line").classed("highlighted", false);
+                            hideTooltip();
+                        });
+                            
+                    });
+                });
+                
             // Add row labels
             svg2.selectAll(".rowLabel")
                 .data(names)
@@ -216,7 +255,29 @@
                 .style("alignment-baseline", "ideographic")
                 .style("font-size", "15px")
                 .attr("transform", (d, i) => `rotate(-45,${i * cellSize + cellSize / 2},-5)`);
-    }
+
+            }
+
+                // Assume this is a tooltip div in your HTML
+            const tooltip = d3.select("body").append("div")
+            .attr("class", "tooltip")
+            .style("opacity", 0);
+
+            function showTooltip(event, d) {
+                tooltip.transition()
+                    .duration(200)
+                    .style("opacity", .9);
+                tooltip.html("Similarity: " + (d.value * 100).toFixed(2) + "%") 
+                    .style("left", (event.pageX + 10) + "px")
+                    .style("top", (event.pageY - 28) + "px");
+            }            
+
+            function hideTooltip() {
+                tooltip.transition()
+                    .duration(500)
+                    .style("opacity", 0);
+            }
+            
     </script>
 </body>
 </html>

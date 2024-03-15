@@ -1,13 +1,10 @@
 h1{
   text-align: center;
 }
-.container {
-    text-align: center;
-  }
-  
+
   #chart1 {
     margin-left: 150px;
-    width: 580.5px;
+    width: 570px;
     height: 800px;
   }
   
@@ -35,7 +32,7 @@ h1{
   
   .container {
     display: inline-block; /* or you can use 'block' for vertical stacking */
-    width: 582.5px;
+    width: 585px;
   }
   
   .legend-container {
@@ -108,6 +105,33 @@ h1{
   .thick {
     height: 10px;
   }
-  
+
+  .highlighted {
+    stroke: red !important; /* For links */
+    fill: red !important; /* For matrix cells */
+    stroke-width: 3px !important;
+}
+
+.tooltip {
+    position: absolute;
+    text-align: center;
+    width: auto;
+    padding: 8px;
+    font: 12px sans-serif;
+    background: lightsteelblue;
+    border: 0px;
+    border-radius: 8px;
+    pointer-events: none;
+    opacity: 0;
+}
+
+.p1{
+  position: relative;
+  z-index: 3;
+  top: 150px;
+  left: 175px;
+}
+
+
 
   
